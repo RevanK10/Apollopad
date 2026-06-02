@@ -1,3 +1,74 @@
+import board
+
+from kmk.kmk_keyboard import KMKKeyboard
+from kmk.scanners.keypad import KeysScanner
+from kmk.keys import KC
+from kmk.modules.encoder import EncoderHandler
+
+# ----------------------------
+# Keyboard object
+# ----------------------------
+keyboard = KMKKeyboard()
+
+# ----------------------------
+# Keys (5 switches + encoder button)
+# ----------------------------
+# Update these to match the actual GPIO numbers for the XIAO RP2040
+PINS = [
+    board.GP26,  # SW1 (Pin 1 / C1)
+    board.GP28,  # SW2 (Pin 3 / C3)
+    board.GP27,  # SW3 (Pin 2 / C2)
+    board.GP29,  # SW4 (Pin 4 / SCLK) - Check if this is SW4 or SW5 on your board
+    board.GP6,   # SW5 (Pin 5 / SDA)
+    board.GP0,   # Encoder push (Pin 8 / RX)
+]
+
+keyboard.matrix = KeysScanner(
+    pins=PINS,
+    value_when_pressed=False,
+    pull=True, # Ensure internal pull-ups are enabled
+)
+
+# ... inside EncoderHandler ...
+
+
+# ----------------------------
+# Rotary encoder
+# ----------------------------
+encoder = EncoderHandler()
+keyboard.modules.append(encoder)
+
+encoder.pins = (
+    (board.GP3, board.GP2),  # A=Pin 11 (D1), B=Pin 10 (D2)
+)
+
+# ----------------------------
+# Keymap
+# ----------------------------
+keyboard.keymap = [
+    [
+        KC.MUTE,        # SW1
+        KC.VOLDOWN,     # SW2
+        KC.VOLUP,       # SW3
+        KC.PLAY_PAUSE,  # SW4
+        KC.ENTER,       # SW5
+        KC.MUTE,        # Encoder button
+    ]
+]
+
+encoder.map = [
+    (
+        KC.VOLDOWN,  # Rotate left
+        KC.VOLUP,    # Rotate right
+    )
+]
+
+# ----------------------------
+# Start KMK
+# ----------------------------
+if __name__ == '__main__':
+    keyboard.go()
+
 # =========================
 # Imports
 # =========================
